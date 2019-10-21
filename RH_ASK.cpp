@@ -392,6 +392,17 @@ void RH_ASK::timerSetup()
     timer0_attachInterrupt(esp8266_timer_interrupt_handler);
     timer0_write(ESP.getCycleCount() + _timerIncrement);
 //    timer0_write(ESP.getCycleCount() + 41660000);
+
+#elif (RH_PLATFORM == RH_PLATFORM_RASPI)
+    uint32_t period = (1000000 / 8) / _speed; // In nanoseconds
+    struct itimerval timer_struct;
+    timer_struct.it_interval.tv_sec = 0;
+    timer_struct.it_interval.tv_usec = period;
+    timer_struct.it_value.tv_sec = 0;
+    timer_struct.it_value.tv_usec = period;
+    setitimer(ITIMER_REAL, &timer_struct, NULL);
+    void alarm_handler(int);
+    signal(SIGALRM, alarm_handler);
 #endif
 
 }
@@ -671,6 +682,10 @@ void INTERRUPT_ATTR esp8266_timer_interrupt_handler()
     thisASKDriver->handleTimerInterrupt();
 }
 
+#elif (RH_PLATFORM == RH_PLATFORM_RASPI)
+void alarm_handler(int signo) {
+    thisASKDriver->handleTimerInterrupt();
+}
 #endif
 
 // Convert a 6 bit encoded symbol into its 4 bit decoded equivalent

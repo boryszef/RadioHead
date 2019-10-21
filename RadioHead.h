@@ -856,6 +856,8 @@
  #define PROGMEM
  #include <RHutil/RasPi.h>
  #include <string.h>
+ #include <signal.h>
+ #include <sys/time.h>
  //Define SS for CS0 or pin 24
  #define SS 8
 
